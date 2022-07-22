@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -14,17 +16,32 @@ func main() {
 	// -----------------
 
 	if os.Args != nil && len(os.Args) > 1 {
-		noteName := os.Args[1]
+		fmt.Println(os.Args)
+		fmt.Println(len(os.Args))
+		fmt.Println(os.Args[len(os.Args)-1])
+		noteName := os.Args[len(os.Args)-1]
 		if noteName != "" {
 
-			// ---
-			// title: 'Tailwind: All size image picture Modal/Overlay'
-			// updated: 2021-04-14 07:04:24Z
-			// created: 2021-04-14 06:59:03Z
-			// tags:
-			//   - dev.tailwind
-			// ---
-			// ---
+			// FLAGS
+
+			// PRETITLE
+			title := ""
+			path := "./"
+			curDir := ""
+			// preTitle := flag.Bool("t", false, "display colorized output")
+			// flag.Parse()
+
+			if len(os.Args) > 2 {
+
+				// Add filepath as pre title
+				path = os.Args[1]
+				splitPath := []string(strings.Split(path, "/"))
+				curDir = splitPath[len(splitPath)-1]
+				fmt.Println("curDir")
+				fmt.Println(curDir)
+				title = curDir + ": "
+			}
+			fmt.Println(title)
 
 			createdTime := time.Now()
 
@@ -33,13 +50,27 @@ func main() {
 			var space = regexp.MustCompile(`\s+`)
 
 			// Replace with
-			fileName := specialChar.ReplaceAllString(strings.TrimSpace(noteName), "")
-			fileName = space.ReplaceAllString(fileName, "_")
+			noteTitle := specialChar.ReplaceAllString(strings.TrimSpace(noteName), "")
+			fileName := space.ReplaceAllString(noteTitle, "_")
 
-			fileContent := "---" + "\n" + "title: " + noteName + "\n" + "updated: " + createdTime.String() + "\n" + "created: " + createdTime.String()[:19] + "\n" + "tags: " + "\n" + "\t" + "- " + noteName + "\n" + "---" + "\n" + "\n" + "# " + noteName + "\n" + "\n"
-			fmt.Println(fileContent)
+			// Write MD content
+			fileContent := "---" + "\n" + "title: " + "'" + strings.ToUpper(title) + noteName + "'" + "\n" + "updated: " + "'" + createdTime.String() + "'" + "\n" + "created: " + "'" + createdTime.String()[:19] + "'" /*  + "\n"+ "tags: " + "\n" + "\t" + "- " + noteName */ + "\n" + "---" + "\n" + "\n" + "# " + strings.ToUpper(title) + noteName + "\n" + "\n"
+
+			fileTarget := "./" + curDir + "/" + fileName + ".md"
+			if _, err := os.Stat(fileTarget); err == nil {
+				fmt.Printf("File exists. Please change file name.\n")
+			} else {
+				fileContentToByteSlics := []byte(fileContent)
+				fmt.Println(fileTarget)
+				err := ioutil.WriteFile("./"+curDir+"/"+fileName+".md", fileContentToByteSlics, 0666)
+				if err != nil {
+					log.Fatalf("Error at writing file: %v", err)
+				}
+				fmt.Printf("✅: Note is created.\n")
+			}
 
 			return
+			// 		Params are: File name, Byte Slice item and read/write... righst (0666 is pretty standard)
 		}
 	} else {
 		fmt.Println("File Name")
