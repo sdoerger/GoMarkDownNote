@@ -36,33 +36,34 @@ func main() {
 		splitPath := []string(strings.Split(path, "/"))
 		curDir = splitPath[len(splitPath)-2]
 		noteName := splitPath[len(splitPath)-1]
-		fmt.Println("curDir")
-		fmt.Println(curDir)
-		fmt.Println("noteName")
-		fmt.Println(noteName)
+
 		title = curDir + ": "
-		fmt.Println(title)
 
 		createdTime := time.Now()
 
 		// TO FIND
-		var specialChar = regexp.MustCompile(`[^a-zA-Z ]`)
-		var space = regexp.MustCompile(`\s+`)
+		// var specialChar = regexp.MustCompile(`[^a-zA-Z ]`)
+		var underscore = regexp.MustCompile(`_`)
+		var extension = regexp.MustCompile(`.md`)
 
 		// Replace with
-		noteTitle := specialChar.ReplaceAllString(strings.TrimSpace(noteName), "")
-		fileName := space.ReplaceAllString(noteTitle, "_")
+		fileName := noteName
+		noteName = underscore.ReplaceAllString(noteName, " ")
+		noteName = extension.ReplaceAllString(noteName, "")
+
+		fmt.Println("fileName")
+		fmt.Println(fileName)
 
 		// Write MD content
 		fileContent := "---" + "\n" + "title: " + "'" + strings.ToUpper(title) + noteName + "'" + "\n" + "created: " + "'" + createdTime.String()[:19] + "'" /*  + "\n"+ "tags: " + "\n" + "\t" + "- " + noteName */ + "\n" + "---" + "\n" + "\n" + "# " + strings.ToUpper(title) + noteName + "\n" + "\n"
 
-		fileTarget := "./" + curDir + "/" + fileName + ".md"
+		fileTarget := "./" + curDir + "/" + fileName
 		if _, err := os.Stat(fileTarget); err == nil {
 			fmt.Printf("File exists. Please change file name.\n")
 		} else {
 			fileContentToByteSlics := []byte(fileContent)
 			fmt.Println(fileTarget)
-			err := ioutil.WriteFile("./"+curDir+"/"+fileName+".md", fileContentToByteSlics, 0666)
+			err := ioutil.WriteFile(fileTarget, fileContentToByteSlics, 0666)
 			if err != nil {
 				log.Fatalf("Error at writing file: %v", err)
 			}
