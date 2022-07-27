@@ -16,14 +16,11 @@ func main() {
 	// -----------------
 
 	if os.Args != nil && len(os.Args) > 1 {
-		fmt.Println(os.Args)
-		fmt.Println(os.Args[1])
-		fmt.Print("RUNS")
 
 		// FLAGS
 
 		// PRETITLE
-		title := ""
+		titlePrefix := ""
 		path := "./"
 		curDir := ""
 		// preTitle := flag.Bool("t", false, "display colorized output")
@@ -31,14 +28,13 @@ func main() {
 
 		fmt.Println("RUNS")
 
-		// Add filepath as pre title
+		// Add filepath as pre titlePrefix
 		path = os.Args[1]
 		splitPath := []string(strings.Split(path, "/"))
 		curDir = splitPath[len(splitPath)-2]
-		noteName := splitPath[len(splitPath)-1]
+		title := splitPath[len(splitPath)-1]
 
-		title = curDir + ": "
-
+		titlePrefix = strings.Split(curDir, " ")[0] + ": "
 		createdTime := time.Now()
 
 		// TO FIND
@@ -46,18 +42,14 @@ func main() {
 		var underscore = regexp.MustCompile(`_`)
 		var extension = regexp.MustCompile(`.md`)
 
-		// Replace with
-		fileName := noteName
-		noteName = underscore.ReplaceAllString(noteName, " ")
-		noteName = extension.ReplaceAllString(noteName, "")
-
-		fmt.Println("fileName")
-		fmt.Println(fileName)
+		// Cleanup
+		title = underscore.ReplaceAllString(title, " ")
+		title = extension.ReplaceAllString(title, "")
 
 		// Write MD content
-		fileContent := "---" + "\n" + "title: " + "'" + strings.ToUpper(title) + noteName + "'" + "\n" + "created: " + "'" + createdTime.String()[:19] + "'" /*  + "\n"+ "tags: " + "\n" + "\t" + "- " + noteName */ + "\n" + "---" + "\n" + "\n" + "# " + strings.ToUpper(title) + noteName + "\n" + "\n"
+		fileContent := "---" + "\n" + "title: " + "'" + strings.ToUpper(titlePrefix) + title + "'" + "\n" + "created: " + "'" + createdTime.String()[:19] + "'" /*  + "\n"+ "tags: " + "\n" + "\t" + "- " + title */ + "\n" + "---" + "\n" + "\n" + "# " + strings.ToUpper(titlePrefix) + title + "\n" + "\n"
 
-		fileTarget := "./" + curDir + "/" + fileName
+		fileTarget := path
 		if _, err := os.Stat(fileTarget); err == nil {
 			fmt.Printf("File exists. Please change file name.\n")
 		} else {
@@ -71,7 +63,5 @@ func main() {
 		}
 
 		return
-		// 		Params are: File name, Byte Slice item and read/write... righst (0666 is pretty standard)
-
 	}
 }
