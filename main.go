@@ -47,7 +47,7 @@ func main() {
 		title = extension.ReplaceAllString(title, "")
 
 		// Write MD content
-		fileContent := "---" + "\n" + "title: " + "'" + strings.ToUpper(titlePrefix) + title + "'" + "\n" + "created: " + "'" + createdTime.String()[:19] + "'" /*  + "\n"+ "tags: " + "\n" + "\t" + "- " + title */ + "\n" + "---" + "\n" + "\n" + "# " + strings.ToUpper(titlePrefix) + title + "\n" + "```javascript" + "\n" +  "\n" + "```" + "\n"
+		fileContent := "---" + "\n" + "title: " + "'" + strings.ToUpper(titlePrefix) + title + "'" + "\n" + "created: " + "'" + createdTime.String()[:19] + "'" /*  + "\n"+ "tags: " + "\n" + "\t" + "- " + title */ + "\n" + "---" + "\n" + "\n" + "# " + strings.ToUpper(titlePrefix) + title + "\n" + "\n" + "```javascript" + "\n" + "\n" + "```" + "\n" + "\n"
 
 		fileTarget := path
 		if _, err := os.Stat(fileTarget); err == nil {
