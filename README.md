@@ -4,4 +4,4 @@ Creates somewhat Joplin compatible markdown notes (and sets the folder name to p
 
 ```shell
 ./GoMarkDownNote myDir/My_first_note.md
-
+```
