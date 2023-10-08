@@ -38,13 +38,30 @@ func createCodeBlock(lang string) string {
 	)
 }
 
+// Function to check if a file exists
+func checkIfFileExists(path string) error {
+	_, err := os.Stat(path)
+	return err
+}
+
+// Function to save content to a file
+func saveContentToFile(path, content string) error {
+	return ioutil.WriteFile(path, []byte(content), 0666)
+}
+
+// Function to write content to a file at a specified path
 func writeToFile(path, content string) error {
-	if _, err := os.Stat(path); err == nil {
+	// Check if the file already exists
+	fileExistsError := checkIfFileExists(path)
+
+	if fileExistsError == nil {
 		fmt.Printf("File exists. Please change file name.\n")
 		return nil
 	}
+
+	// If file does not exist, proceed to create it
 	fmt.Println("✅ Note is created.")
-	return ioutil.WriteFile(path, []byte(content), 0666)
+	return saveContentToFile(path, content)
 }
 
 func cleanUpTitle(rawTitle string) string {
