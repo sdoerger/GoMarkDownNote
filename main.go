@@ -1,67 +1,89 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"regexp"
 	"strings"
 	"time"
 )
 
+func createMarkdown(title string, createdTime time.Time, titlePrefix string) string {
+	return fmt.Sprintf(
+		"---\n"+
+			"title: '%s%s'\n"+
+			"created: '%s'\n"+
+			"---\n"+
+			"\n"+
+			"# %s%s\n"+
+			"\n",
+		strings.ToUpper(titlePrefix),
+		title,
+		createdTime.String()[:19],
+		strings.ToUpper(titlePrefix),
+		title,
+	)
+}
+
+func createCodeBlock(lang string) string {
+	return fmt.Sprintf(
+		"\n"+
+			"```%s\n"+
+			"\n"+
+			"```"+
+			"\n",
+		lang,
+	)
+}
+
+func writeToFile(path, content string) error {
+	if _, err := os.Stat(path); err == nil {
+		fmt.Printf("File exists. Please change file name.\n")
+		return nil
+	}
+	fmt.Println("✅ Note is created.")
+	return ioutil.WriteFile(path, []byte(content), 0666)
+}
+
+func cleanUpTitle(rawTitle string) string {
+	var underscore = regexp.MustCompile(`_`)
+	var extension = regexp.MustCompile(`.md`)
+	title := underscore.ReplaceAllString(rawTitle, " ")
+	title = extension.ReplaceAllString(title, "")
+	return title
+}
+
 func main() {
-	// -----------------
-	// Command line Args
-	// -----------------
 
-	if os.Args != nil && len(os.Args) > 1 {
+	// Define flags
+	langPtr := flag.String("lang", "", "language for code block")
 
-		// FLAGS
+	// Parse the flags
+	flag.Parse()
 
-		// PRETITLE
-		titlePrefix := ""
-		path := "./"
-		curDir := ""
-		// preTitle := flag.Bool("t", false, "display colorized output")
-		// flag.Parse()
+	// Get the remaining positional arguments
+	args := flag.Args()
 
-		fmt.Println("RUNS")
-
-		// Add filepath as pre titlePrefix
-		path = os.Args[1]
-		splitPath := []string(strings.Split(path, "/"))
-		curDir = splitPath[len(splitPath)-2]
-		title := splitPath[len(splitPath)-1]
-
-		titlePrefix = strings.Split(curDir, " ")[0] + ": "
-		createdTime := time.Now()
-
-		// TO FIND
-		// var specialChar = regexp.MustCompile(`[^a-zA-Z ]`)
-		var underscore = regexp.MustCompile(`_`)
-		var extension = regexp.MustCompile(`.md`)
-
-		// Cleanup
-		title = underscore.ReplaceAllString(title, " ")
-		title = extension.ReplaceAllString(title, "")
-
-		// Write MD content
-		fileContent := "---" + "\n" + "title: " + "'" + strings.ToUpper(titlePrefix) + title + "'" + "\n" + "created: " + "'" + createdTime.String()[:19] + "'" /*  + "\n"+ "tags: " + "\n" + "\t" + "- " + title */ + "\n" + "---" + "\n" + "\n" + "# " + strings.ToUpper(titlePrefix) + title + "\n" + "\n" + "```javascript" + "\n" + "\n" + "```" + "\n" + "\n"
-
-		fileTarget := path
-		if _, err := os.Stat(fileTarget); err == nil {
-			fmt.Printf("File exists. Please change file name.\n")
-		} else {
-			fileContentToByteSlics := []byte(fileContent)
-			fmt.Println(fileTarget)
-			err := ioutil.WriteFile(fileTarget, fileContentToByteSlics, 0666)
-			if err != nil {
-				log.Fatalf("Error at writing file: %v", err)
-			}
-			fmt.Printf("✅: Note is created.\n")
-		}
-
+	if len(args) == 0 {
+		fmt.Println("No positional arguments provided.")
 		return
 	}
+
+	path := args[0]
+	splitPath := strings.Split(path, "/")
+	curDir := splitPath[len(splitPath)-2]
+	title := splitPath[len(splitPath)-1]
+	titlePrefix := strings.Split(curDir, " ")[0] + ": "
+	createdTime := time.Now()
+
+	title = cleanUpTitle(title)
+
+	fileContent := createMarkdown(title, createdTime, titlePrefix)
+	if len(*langPtr) > 0 {
+		fileContent += createCodeBlock(*langPtr)
+	}
+
+	writeToFile(path, fileContent)
 }
